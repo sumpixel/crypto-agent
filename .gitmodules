@@ -1,0 +1,4 @@
+[submodule "packages/web3.js"]
+	path = packages/web3.js
+	url = https://github.com/sumpixel/web3.js.git
+	branch = 1.0
