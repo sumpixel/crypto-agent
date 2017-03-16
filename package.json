@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/sumpixel/crypto-wallet-topup#readme",
   "dependencies": {
+    "bitcoin-core": "^1.2.0",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
     "lerna": "2.0.0-beta.36",
     "superagent": "^3.5.0",
     "winston": "^2.3.1"

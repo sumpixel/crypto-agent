@@ -24,7 +24,7 @@ function processNewTransaction(txHash, blockHash, txIndex, isAddressInsideWallet
       }
     })
     .catch((err) => {
-      logger.error(`[ETH] Failed to process new transaction ${txHash}`, err);
+      logger.error(`[ETH] Failed to process new transaction ${txHash}`, err.message);
     });
 }
 
@@ -60,7 +60,7 @@ function processNewBlockHeader(blockHeader) {
     })
     .catch((err) => {
       // TODO should we try to process it again?
-      logger.error(`[ETH] Failed to process new block ${blockHeader.number}`, err);
+      logger.error(`[ETH] Failed to process new block ${blockHeader.number}`, err.message);
     })
     .then(() => {
       const blockInfo = {
