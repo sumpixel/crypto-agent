@@ -6,6 +6,7 @@ const web3 = new Web3();
 let latestBlockNumber = 0;
 
 function processNewTransaction(txHash, blockHash, txIndex, isAddressInsideWallet) {
+  // TODO check whether getTransaction(txHash) works
   return web3.eth.getTransactionFromBlock(blockHash, txIndex)
     .then((tx) => {
       return Promise.all([tx, isAddressInsideWallet(tx.to)]);
