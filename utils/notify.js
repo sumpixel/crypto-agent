@@ -8,10 +8,11 @@ function notifyFundReceived(txInfo) {
     .send(txInfo)
     .end((err, resp) => {
       if (!err && resp.ok) {
-        logger.debug('Notify fund received success', txInfo);
+        logger.debug('Notify fund received success', { response: resp.body, txInfo });
       } else {
         // TODO resend notification if failed?
-        logger.error('Notify fund received failed', err || resp.body, txInfo);
+        const message = err ? err.message : resp.body;
+        logger.error('Notify fund received failed', { message, txInfo });
       }
     });
 }
@@ -22,10 +23,11 @@ function notifyNewBlock(blockInfo) {
     .send(blockInfo)
     .end((err, resp) => {
       if (!err && resp.ok) {
-        logger.debug('Notify new block success', blockInfo);
+        logger.debug('Notify new block success', { response: resp.body, blockInfo });
       } else {
         // TODO resend notification if failed?
-        logger.error('Notify new block failed', err || resp.body, blockInfo);
+        const message = err ? err.message : resp.body;
+        logger.error('Notify new block failed', { message, blockInfo });
       }
     });
 }

@@ -1,4 +1,5 @@
 import winston from 'winston';
+import util from 'util';
 
 const logger = new (winston.Logger)({
   transports: [
@@ -6,7 +7,7 @@ const logger = new (winston.Logger)({
       level: 'debug',
       timestamp: true,
       colorize: true,
-      prettyPrint: true,
+      prettyPrint: meta => `\n${util.inspect(meta, { colors: false })}`,
     }),
   ],
 });

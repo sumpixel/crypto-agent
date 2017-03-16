@@ -65,7 +65,8 @@ function processNewBlockHeader(blockHeader) {
     .then(() => {
       const blockInfo = {
         currency: 'ETH',
-        blockHash: blockHeader.hash,
+        // FIXME block hash is undefined in newBlockHeader returned by subscription
+        // blockHash: blockHeader.hash,
         blockNumber: blockHeader.number,
       };
       notify.notifyNewBlock(blockInfo);
@@ -75,14 +76,14 @@ function processNewBlockHeader(blockHeader) {
 function subscribe() {
   web3.eth.subscribe('newBlockHeaders', (err, newBlockHeader) => {
     if (err) {
-      logger.error('Failed to subscribe to latest block', err.reason);
+      logger.error('[ETH] Failed to subscribe to latest block', err.reason);
     }
   })
   .on('data', (newBlockHeader) => {
     processNewBlockHeader(newBlockHeader);
   })
   .on('error', (err) => {
-    logger.error('Failed to get latest block', err.reason);
+    logger.error('[ETH] Failed to get latest block', err.reason);
   });
 }
 
@@ -97,6 +98,8 @@ function connect(options) {
   connectionProvider.on('connect', () => {
     logger.info('[ETH] connected', wsPath);
     subscribe();
+    // const blockHeader = { number: 583845 };
+    // processNewBlockHeader(blockHeader);
   });
 
   connectionProvider.on('notification', (err, notification) => {
@@ -107,7 +110,7 @@ function connect(options) {
 
     setTimeout(() => {
       logger.info('[ETH] reconnect', wsPath);
-      connect(wsPath);
+      connect(options);
     }, reconnectInterval);
   });
 
