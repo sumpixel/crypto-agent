@@ -13,7 +13,19 @@ app.use(bodyParser.json());
 eth.connect(config.connection.eth);
 btc.init(config.connection.btc);
 
+function getInfo(req, res) {
+  return Promise.all([eth.getInfo(), btc.getInfo()])
+    .then((infos) => {
+      const [ethInfo, btcInfo] = infos;
+      res.json({ eth: ethInfo, btc: btcInfo });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: err.message });
+    });
+}
+
 app.use('/notify', btc.router);
+app.get('/info', getInfo);
 
 const port = process.env.PORT || config.port || 3000;
 app.listen(port, () => {

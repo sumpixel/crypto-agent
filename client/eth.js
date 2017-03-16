@@ -3,6 +3,7 @@ import logger from '../utils/logger';
 import notify from '../utils/notify';
 
 const web3 = new Web3();
+let latestBlockNumber = 0;
 
 function processNewTransaction(txHash, blockHash, txIndex, isAddressInsideWallet) {
   return web3.eth.getTransactionFromBlock(blockHash, txIndex)
@@ -14,7 +15,7 @@ function processNewTransaction(txHash, blockHash, txIndex, isAddressInsideWallet
       if (isInsideWallet) {
         const txInfo = {
           address: tx.to,
-          amount: web3.utils.fromWei(tx.value, 'ether'),
+          value: web3.utils.fromWei(tx.value, 'ether'),
           currency: 'ETH',
           txHash: tx.hash,
           blockHash: tx.blockHash,
@@ -43,6 +44,10 @@ function processNewBlock(block, isAddressInsideWallet) {
 }
 
 function processNewBlockHeader(blockHeader) {
+  // FIXME hash is undefined in blockHeader from notification
+  const { number: blockNumber } = blockHeader;
+  latestBlockNumber = blockNumber;
+
   const accountPromise = web3.eth.getAccounts()
     .then((addresses) => {
       const isAddressInsideWallet = (address) => {
@@ -50,24 +55,23 @@ function processNewBlockHeader(blockHeader) {
       };
       return isAddressInsideWallet;
     });
-  const blockPromise = web3.eth.getBlock(blockHeader.number);
+  const blockPromise = web3.eth.getBlock(blockNumber);
 
   Promise.all([accountPromise, blockPromise])
     .then((results) => {
       const [isAddressInsideWallet, block] = results;
-      logger.debug('[ETH] Block', blockHeader.number);
+      logger.debug('[ETH] Block', blockNumber);
       return processNewBlock(block, isAddressInsideWallet);
     })
     .catch((err) => {
       // TODO should we try to process it again?
-      logger.error(`[ETH] Failed to process new block ${blockHeader.number}`, err.message);
+      logger.error(`[ETH] Failed to process new block ${blockNumber}`, err.message);
     })
     .then(() => {
       const blockInfo = {
         currency: 'ETH',
-        // FIXME block hash is undefined in newBlockHeader returned by subscription
-        // blockHash: blockHeader.hash,
-        blockNumber: blockHeader.number,
+        // blockHash,
+        blockNumber,
       };
       notify.notifyNewBlock(blockInfo);
     });
@@ -117,6 +121,17 @@ function connect(options) {
   web3.setProvider(connectionProvider);
 }
 
+function getInfo() {
+  return web3.eth.getBlockNumber()
+    .then((serverBlockNumber) => {
+      return Promise.resolve({
+        server: { blockNumber: serverBlockNumber },
+        client: { blockNumber: latestBlockNumber },
+      });
+    });
+}
+
 export default {
   connect,
+  getInfo,
 };

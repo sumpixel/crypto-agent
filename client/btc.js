@@ -4,6 +4,7 @@ import logger from '../utils/logger';
 import notify from '../utils/notify';
 
 let client;
+let latestBlockHash = '';
 
 function init(options) {
   client = new Client(options);
@@ -11,6 +12,8 @@ function init(options) {
 
 function handleBlockNotify(req, res) {
   const { blockhash: blockHash } = req.body;
+  latestBlockHash = blockHash;
+
   logger.debug('[BTC] Block', blockHash);
   client.getBlock(blockHash)
     .then((block) => {
@@ -54,7 +57,7 @@ function handleWalletNotify(req, res) {
       // TODO wait for 6 confirmations
       const txInfo = {
         address: receivingAddress,
-        amount: tx.amount,
+        value: String(tx.amount),
         currency: 'BTC',
         txHash: txID,
         blockHash: tx.blockhash,
@@ -74,6 +77,16 @@ function handleWalletNotify(req, res) {
     });
 }
 
+function getInfo() {
+  return client.getInfo()
+    .then((serverInfo) => {
+      return Promise.resolve({
+        server: serverInfo,
+        client: { latestBlockHash },
+      });
+    });
+}
+
 const router = Router();
 router.post('/btc/block', handleBlockNotify);
 router.post('/btc/wallet', handleWalletNotify);
@@ -81,4 +94,5 @@ router.post('/btc/wallet', handleWalletNotify);
 export default {
   init,
   router,
+  getInfo,
 };

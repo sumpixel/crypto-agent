@@ -14,7 +14,7 @@ const logger = new (winston.Logger)({
 
 const logStream = {
   write: (data) => {
-    winston.info(data.replace(/\n$/, ''));
+    logger.info(data.replace(/\n$/, ''));
   },
 };
 
